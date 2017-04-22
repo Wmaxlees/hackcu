@@ -54,7 +54,7 @@ def main (argv):
     filename = 'data/train-images-idx3-ubyte'
     training_data = load_mnist_training_data(filename)
     
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(10000, 10), random_state=1)
+    clf = MLPClassifier(solver='sgd', verbose=True, alpha=1e-6, hidden_layer_sizes=(10000, 10), random_state=1, activation='tanh')
     clf.fit(training_data, training_labels)  
 
     filename = 'test/t10k-labels-idx1-ubyte'

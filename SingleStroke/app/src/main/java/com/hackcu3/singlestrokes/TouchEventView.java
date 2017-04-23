@@ -20,6 +20,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -28,16 +29,20 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.graphics.Path.Direction.CW;
+
 /**
  * Created by nivinantonalexislawrence on 4/22/17.
  */
 
 public class TouchEventView extends View {
     private Paint paint = new Paint();
-    private Path path = new Path();
+    private List<Path> pathList = new ArrayList<>();
+    private Path path;
     private Path path_add = new Path();
     public List<Float> listOfPointX = new ArrayList<>();
     public List<Float> listOfPointY = new ArrayList<>();
+    float startX, startY, endX, endY;
 
     Context context;
 
@@ -80,7 +85,9 @@ public class TouchEventView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawPath(path, paint);
+        for (Path p : pathList) {
+            canvas.drawPath(p, paint);
+        }
     }
 
     @Override
@@ -90,9 +97,15 @@ public class TouchEventView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: // start position
+                // add new path to our path list
+                pathList.add(new Path());
+                path = pathList.get(pathList.size() - 1);
+
                 path.moveTo(eventX, eventY);
                 listOfPointX.add(eventX);
                 listOfPointY.add(eventY);
+                startX = eventX;
+                startY = eventY;
                 path_add.moveTo(eventX, eventY);
                 return true;
             case MotionEvent.ACTION_MOVE:
@@ -106,13 +119,19 @@ public class TouchEventView extends View {
             case MotionEvent.ACTION_UP:
                 PointsDraw pointsDraw = convertToData(listOfPointX, listOfPointY);
                 String data = new Gson().toJson(pointsDraw).toString();
+                endX = eventX;
+                endY = eventY;
+                pointsDraw.setEndpoints(startX, startY, endX, endY);
                 //Log.e(TouchEventView.class.getName(), data);
                 CallAPI callAPI = new CallAPI();
                 callAPI.execute(pointsDraw);
                 listOfPointX.clear();
                 listOfPointY.clear();
                 path.reset();
-
+                startX = 0;
+                startY = 0;
+                endX = 0;
+                endY = 0;
                 break;
             default:
                 return false;
@@ -189,14 +208,15 @@ public class TouchEventView extends View {
 
 
         PointsDraw pointsDraw = new PointsDraw(bytesX, bytesY, "circle");
-
+        pointsDraw.setBoundaries(minX, minY, maxX, maxY);
         return pointsDraw;
 
 
     }
 
 
-    public class CallAPI extends AsyncTask<PointsDraw, PointsDraw, PointsDraw> {
+    public class CallAPI extends AsyncTask<PointsDraw, PointsDraw, String> {
+        PointsDraw p;
 
         public CallAPI() {
             //set context variables if required
@@ -210,9 +230,9 @@ public class TouchEventView extends View {
 
 
         @Override
-        protected PointsDraw doInBackground(PointsDraw... params) {
-            String resultToDisplay = "";
+        protected String doInBackground(PointsDraw... params) {
 
+            String responseString = null;
             InputStream in = null;
             try {
 
@@ -220,6 +240,7 @@ public class TouchEventView extends View {
                 HttpPost httppost = new HttpPost("http://ec2-52-43-9-170.us-west-2.compute.amazonaws.com/upload");
 
                 try {
+                    p = params[0];   // used in onPostExecute
                     // Add your data
                     List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
 
@@ -239,7 +260,7 @@ public class TouchEventView extends View {
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                     // Execute HTTP Post Request
                     HttpResponse response = httpclient.execute(httppost);
-
+                    responseString = new BasicResponseHandler().handleResponse(response);
                     Log.e(TouchEventView.class.getName(), response.toString());
 
 
@@ -253,18 +274,36 @@ public class TouchEventView extends View {
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 return null;
-                //return e.getMessage();
 
             }
-            return null;
+            return responseString;
         }
 
 
         @Override
-        protected void onPostExecute(PointsDraw result) {
+        protected void onPostExecute(String result) {
+            float centerX = (p.getMaxX() + p.getMinX()) / 2.0f;
+            float centerY = (p.getMaxY() + p.getMinY()) / 2.0f;
+
             //Update the UI
+            //result = "square";
+            switch (result) {
+                case "circle":
+                    float radius = (p.getMaxX() - p.getMinX()) / 2.0f;
+                    path.addCircle(centerX, centerY, radius, CW);
+                    break;
+                case "square":
+                    //path.addRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), CW);
+                    path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(),6,6, CW);
+                    break;
+                case "line":
+                    path.moveTo(p.getStartX(), p.getStartY());
+                    path.lineTo(p.getEndX(), p.getEndY());
+                    break;
+                default:
+            }
+            postInvalidate();
+
         }
-
-
     }
 }

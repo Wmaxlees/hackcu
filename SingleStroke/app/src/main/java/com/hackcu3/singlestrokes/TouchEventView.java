@@ -51,6 +51,7 @@ public class TouchEventView extends View {
     public TouchEventView(Context context, AttributeSet attrs) {
         super(context, attrs);
         gestureDetector = new GestureDetector(context, new GestureListener());
+        //gestureDetector.setOnDoubleTapListener((GestureDetector.OnDoubleTapListener) context);
         this.context = context;
 
         paint.setAntiAlias(true); // Smoother lines
@@ -59,6 +60,7 @@ public class TouchEventView extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
         this.setDrawingCacheEnabled(true);
+
         //Log.e("Hello", "Test");
     }
 
@@ -75,11 +77,13 @@ public class TouchEventView extends View {
             float y = e.getY();
 
             // clean drawing area on double tap
-            path.reset();
-            Log.d("Double Tap", "Tapped at: (" + x + "," + y + ")");
+            //path.reset();
+            Log.e("Double Tap", "Tapped at: (" + x + "," + y + ")");
 
             return true;
         }
+
+
 
     }
 
@@ -92,8 +96,9 @@ public class TouchEventView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float eventX = event.getX();
-        float eventY = event.getY();
+        float eventX = event.getX() ;
+        float eventY = event.getY() ;
+
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: // start position
@@ -108,6 +113,7 @@ public class TouchEventView extends View {
                 startY = eventY;
                 path_add.moveTo(eventX, eventY);
                 return true;
+
             case MotionEvent.ACTION_MOVE:
 
                 path.lineTo(eventX, eventY);
@@ -116,6 +122,9 @@ public class TouchEventView extends View {
                 path_add.lineTo(eventX, eventY);
 
                 break;
+
+
+
             case MotionEvent.ACTION_UP:
                 PointsDraw pointsDraw = convertToData(listOfPointX, listOfPointY);
                 String data = new Gson().toJson(pointsDraw).toString();
@@ -186,14 +195,16 @@ public class TouchEventView extends View {
 
         List<Byte> bytesX = new ArrayList<>();
         List<Byte> bytesY = new ArrayList<>();
-        int prevx=0, prevy=0;
+        int prevx = 0, prevy = 0;
         for (int i = 0; i < listOfPointX.size(); ++i) {
 
             int currX, currY;
             listOfPointX.set(i, (listOfPointX.get(i) - minX) * scaleRatio);
             listOfPointY.set(i, (listOfPointY.get(i) - minY) * scaleRatio);
+            //Log.e(TouchEventView.class.getName(), String.valueOf(listOfPointX.get(i)) + "," + String.valueOf(listOfPointY.get(i)));
             currX = (byte) (int) Math.floor(listOfPointX.get(i));
             currY = (byte) (int) Math.floor(listOfPointY.get(i));
+            //Log.e(TouchEventView.class.getName(), String.valueOf(currX) + "," + String.valueOf(currY));
             if (i > 0 && prevx != currX && prevy != currY) {
                 bytesX.add((byte) currX);
                 bytesY.add((byte) currY);
@@ -237,7 +248,7 @@ public class TouchEventView extends View {
             try {
 
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost("http://ec2-52-43-9-170.us-west-2.compute.amazonaws.com/upload");
+                HttpPost httppost = new HttpPost("http://ec2-52-43-9-170.us-west-2.compute.amazonaws.com/classify");
 
                 try {
                     p = params[0];   // used in onPostExecute
@@ -247,7 +258,8 @@ public class TouchEventView extends View {
                     //nameValuePairs.add(new BasicNameValuePair("data", params[0]));
                     nameValuePairs.add(new BasicNameValuePair("x", params[0].getPointsX().toString()));
                     nameValuePairs.add(new BasicNameValuePair("y", params[0].getPointsY().toString()));
-                    nameValuePairs.add(new BasicNameValuePair("shape", "circle"));
+                    nameValuePairs.add(new BasicNameValuePair("shape", "line"));
+                    //new ArrayList<>().add()
 
                     Log.e(TouchEventView.class.getName(), params[0].getPointsX().toString());
                     Log.e(TouchEventView.class.getName(), params[0].getPointsY().toString());
@@ -270,9 +282,8 @@ public class TouchEventView extends View {
                     // TODO Auto-generated catch block
                 }
 
-
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+
                 return null;
 
             }
@@ -282,26 +293,40 @@ public class TouchEventView extends View {
 
         @Override
         protected void onPostExecute(String result) {
+
+            //if(p==null)
+            //if(true)
+              //  return;
             float centerX = (p.getMaxX() + p.getMinX()) / 2.0f;
             float centerY = (p.getMaxY() + p.getMinY()) / 2.0f;
 
+            /*if(result == null&&pathList.size() > 0) {
+                pathList.remove(pathList.size() - 1);
+                return;
+            }*/
             //Update the UI
             //result = "square";
-            switch (result) {
-                case "circle":
-                    float radius = (p.getMaxX() - p.getMinX()) / 2.0f;
-                    path.addCircle(centerX, centerY, radius, CW);
-                    break;
-                case "square":
-                    //path.addRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), CW);
-                    path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(),6,6, CW);
-                    break;
-                case "line":
-                    path.moveTo(p.getStartX(), p.getStartY());
-                    path.lineTo(p.getEndX(), p.getEndY());
-                    break;
-                default:
+            Log.e(TouchEventView.class.getName(), result);
+            result = result.trim();
+
+            if (result.equals("circle")) {
+                float radius = (p.getMaxX() - p.getMinX()) / 2.0f;
+                path.addCircle(centerX, centerY, radius, CW);
+                Log.e(TouchEventView.class.getName(), "I am here");
+
+            } else if (result.equals("square")) {
+                path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), 6, 6, CW);
+
+            } else if (result.equals("line")) {
+                path.moveTo(p.getStartX(), p.getStartY());
+                path.lineTo(p.getEndX(), p.getEndY());
+
+            } else {
+
+                Log.e(TouchEventView.class.getName(), "I am here 2");
             }
+
+
             postInvalidate();
 
         }

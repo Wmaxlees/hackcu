@@ -37,8 +37,8 @@ import static android.graphics.Path.Direction.CW;
 
 public class TouchEventView extends View {
     private Paint paint = new Paint();
-    private List<Path> pathList = new ArrayList<>(new Path());
-    private Path path = pathList[0];
+    private List<Path> pathList = new ArrayList<>();
+    private Path path;
     private Path path_add = new Path();
     public List<Float> listOfPointX = new ArrayList<>();
     public List<Float> listOfPointY = new ArrayList<>();
@@ -85,7 +85,7 @@ public class TouchEventView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        for (path p : pathList) {
+        for (Path p : pathList) {
             canvas.drawPath(p, paint);
         }
     }
@@ -99,7 +99,7 @@ public class TouchEventView extends View {
             case MotionEvent.ACTION_DOWN: // start position
                 // add new path to our path list
                 pathList.add(new Path());
-                path = pathList.get(list.size() - 1);
+                path = pathList.get(pathList.size() - 1);
 
                 path.moveTo(eventX, eventY);
                 listOfPointX.add(eventX);
@@ -286,7 +286,7 @@ public class TouchEventView extends View {
             float centerY = (p.getMaxY() + p.getMinY()) / 2.0f;
 
             //Update the UI
-//            result = "square";
+            //result = "square";
             switch (result) {
                 case "circle":
                     float radius = (p.getMaxX() - p.getMinX()) / 2.0f;

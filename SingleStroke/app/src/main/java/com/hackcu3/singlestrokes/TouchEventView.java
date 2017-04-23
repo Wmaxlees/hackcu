@@ -84,7 +84,6 @@ public class TouchEventView extends View {
         }
 
 
-
     }
 
     @Override
@@ -112,7 +111,8 @@ public class TouchEventView extends View {
                 startX = eventX;
                 startY = eventY;
                 path_add.moveTo(eventX, eventY);
-                return true;
+                return true
+                        ;
 
             case MotionEvent.ACTION_MOVE:
 

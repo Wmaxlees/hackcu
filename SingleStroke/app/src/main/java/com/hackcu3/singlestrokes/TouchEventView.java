@@ -316,7 +316,8 @@ public class TouchEventView extends View {
 
             //Update the UI
             //result = "square";
-            List<Float> data = new ArrayList<>();
+            List<Float> data = Collections.synchronizedList(new ArrayList<>());
+//            List<Float> data = new ArrayList<>();
             switch (result) {
                 case "circle":
                     float radius = (p.getMaxX() - p.getMinX()) / 2.0f;

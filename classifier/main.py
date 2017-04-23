@@ -2,6 +2,7 @@ import math
 import sys
 import numpy as np
 from sklearn.neural_network import MLPClassifier
+from sklearn import svm
 from sklearn.externals import joblib
 
 def load_mnist_training_data (filename):
@@ -58,7 +59,8 @@ def main (argv):
     # training_data = load_mnist_training_data(argv[2])
     training_data = np.load(argv[2])
     
-    clf = MLPClassifier(max_iter=400, learning_rate_init=0.003, verbose=True, alpha=1e-6, hidden_layer_sizes=(20000, 3), random_state=1, activation='relu')
+    #clf = MLPClassifier(max_iter=400, learning_rate_init=0.002, verbose=True, alpha=1e-6, hidden_layer_sizes=(10000, 3), random_state=1, activation='relu', solver='adam')
+    clf = svm.SVC(decision_function_shape='ovo', kernel='rbf')
     clf.fit(training_data, training_labels)  
 
     #filename = 'test/t10k-labels-idx1-ubyte'
@@ -72,7 +74,8 @@ def main (argv):
     accuracy = clf.score(testing_data, testing_labels)
     print(accuracy*100)
 
-    joblib.dump(clf, 'hmm.pkl')
+    #joblib.dump(clf, 'hmm.pkl')
+    joblib.dump(clf, 'svm.pkl')
 
 
 if __name__ == '__main__':

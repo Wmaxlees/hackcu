@@ -51,7 +51,7 @@ module.exports = function(app, config) {
     }
     aStream.end();
 
-    var process = spawn('python3', [__dirname + '/../classify.py', filename]);
+    var process = spawn('python', [__dirname + '/../classify.py', filename]);
     process.stdout.on('data', (data) => {
       res.status(200).send(data);
     });

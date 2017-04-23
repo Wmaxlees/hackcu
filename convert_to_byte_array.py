@@ -1,5 +1,8 @@
+import os
+import math
 import numpy as np
 import sys
+from bresenham import bresenham
 
 def load_xy_values (filename):
     file = open(filename, 'r')
@@ -19,34 +22,25 @@ def generate_matrix_values (x_values, y_values):
     values = np.zeros((28, 28), dtype=np.int8)
 
     for i in range(len(x_values)-1):
-        x0 = x_values[i]
-        x1 = x_values[i+1]
+        # print(len(x_values))
+        points = list(bresenham(x_values[i], y_values[i], x_values[i+1], y_values[i+1]))
 
-        y0 = y_values[i]
-        y1 = y_values[i+1]
-
-        delta_x = x1 - x0
-        delta_y = y1 - y0
-        delta_err = abs(delta_y / delta_x)
-        error = delta_err - 0.5
-        y = y0
-        for x in range(x0, x1): 
-            values[x][y] = 255
-            error = error + delta_err
-            if error >= 0.5:
-                y = y + 1
-                error = error - 1.0
-
+        for point in points:
+            values[point[0]][point[1]] = 1
+            
     return values.flatten()
 
 
 def main (argv):
-    filename = 'test.txt'
-    x_values, y_values = load_xy_values(filename)
+    for shape in os.listdir(argv[1]):
+        for file in os.listdir(argv[1] + '/' + shape):
+            filename = argv[1] + '/' + shape + '/' + file;
+            x_values, y_values = load_xy_values(filename)
 
-    final = generate_matrix_values(x_values, y_values)
+            final = generate_matrix_values(x_values, y_values)
 
-    print(final)
+            target = argv[2] + '/' + shape + '/' + file;
+            np.save(target, final)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,8 @@
 import math
 import sys
+import numpy as np
 from sklearn.neural_network import MLPClassifier
+from sklearn import svm
 from sklearn.externals import joblib
 
 def load_mnist_training_data (filename):
@@ -49,25 +51,31 @@ def load_mnist_training_labels (filename):
 
 
 def main (argv):
-    filename = 'data/train-labels-idx1-ubyte'
-    training_labels = load_mnist_training_labels(filename)
+    # filename = 'data/train-labels-idx1-ubyte'
+    # training_labels = load_mnist_training_labels(argv[1])
+    training_labels = np.load(argv[1])
 
-    filename = 'data/train-images-idx3-ubyte'
-    training_data = load_mnist_training_data(filename)
+    # filename = 'data/train-images-idx3-ubyte'
+    # training_data = load_mnist_training_data(argv[2])
+    training_data = np.load(argv[2])
     
-    clf = MLPClassifier(solver='sgd', verbose=True, alpha=1e-6, hidden_layer_sizes=(10000, 10), random_state=1, activation='tanh')
+    #clf = MLPClassifier(max_iter=400, learning_rate_init=0.002, verbose=True, alpha=1e-6, hidden_layer_sizes=(10000, 3), random_state=1, activation='relu', solver='adam')
+    clf = svm.SVC(decision_function_shape='ovo', kernel='rbf')
     clf.fit(training_data, training_labels)  
 
-    filename = 'test/t10k-labels-idx1-ubyte'
-    testing_labels = load_mnist_training_labels(filename)
+    #filename = 'test/t10k-labels-idx1-ubyte'
+    # testing_labels = load_mnist_training_labels(argv[3])
+    testing_labels = np.load(argv[3])
 
-    filename = 'test/t10k-images-idx3-ubyte'
-    testing_data = load_mnist_training_data(filename)
+    #filename = 'test/t10k-images-idx3-ubyte'
+    # testing_data = load_mnist_training_data(argv[4])
+    testing_data = np.load(argv[4])
 
     accuracy = clf.score(testing_data, testing_labels)
     print(accuracy*100)
 
-    joblib.dump(clf, 'hmm.pkl')
+    #joblib.dump(clf, 'hmm.pkl')
+    joblib.dump(clf, 'svm.pkl')
 
 
 if __name__ == '__main__':

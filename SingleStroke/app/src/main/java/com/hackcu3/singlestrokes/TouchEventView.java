@@ -316,30 +316,30 @@ public class TouchEventView extends View {
             switch (result) {
                 case "circle":
                     float radius = (p.getMaxX() - p.getMinX()) / 2.0f;
-                    List<ObjectData> data = new ArrayList<>();
+                    List<float> data = new ArrayList<>();
                     data.add(centerX)
                     data.add(centerY)
                     data.add(radius)
-                    objectDataList.add(data)
+                    objectDataList.add(new ObjectData("circle", data))
                     path.addCircle(centerX, centerY, radius, CW);
                     break;
                 case "square":
                     //path.addRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), CW);
-                    List<ObjectData> data = new ArrayList<>();
+                    List<float> data = new ArrayList<>();
                     data.add(p.getMinX())
                     data.add(p.getMaxY())
                     data.add(p.getMaxX())
                     data.add(p.getMinY())
-                    objectDataList.add(data)
+                    objectDataList.add(new ObjectData("square", data))
                     path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(),6,6, CW);
                     break;
                 case "line":
-                    List<ObjectData> data = new ArrayList<>();
+                    List<float> data = new ArrayList<>();
                     data.add(p.getStartX())
                     data.add(p.getStartY())
                     data.add(p.getEndX())
                     data.add(p.getEndY())
-                    objectDataList.add(data)
+                    objectDataList.add(new ObjectData("line", data))
                     path.moveTo(p.getStartX(), p.getStartY());
                     path.lineTo(p.getEndX(), p.getEndY());
                     break;

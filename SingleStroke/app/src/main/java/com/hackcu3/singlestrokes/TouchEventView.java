@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 
 import static android.graphics.Path.Direction.CW;
 
@@ -115,10 +116,17 @@ public class TouchEventView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: // start position
-                // add new path to our path list
+                selectedIndex = -1;
+                for (Integer i = 0; i < pathList.size(); ++i) {
+                    if (shapeContainsPoint(pathList[i], objectDataList[i], eventX, eventY)) {
+                        // @TODO: double-click would check here if i was already selected
+                        selectedIndex = i;
+                        // @TODO: change color of selected object
+                        System.out.println("selected object " + i);
+                    }
+                }
                 pathList.add(new Path());
                 path = pathList.get(pathList.size() - 1);
-
                 path.moveTo(eventX, eventY);
                 listOfPointX.add(eventX);
                 listOfPointY.add(eventY);
@@ -338,7 +346,25 @@ public class TouchEventView extends View {
                 default:
             }
             postInvalidate();
-
         }
     }
+    boolean shapeContainsPoint(Path p, ObjectData o, float x, float y) {
+        switch(o.objectShape) {
+            case "circle":
+                return euclidianDistance(o.data[0], x, o.data[1], y) <= o.data[2];
+                break;
+            case "square":
+                return o.data[0] <= x && o.data[1] >= y && o.data[2] >= x && o.data[3] <= y;
+                break;
+            case "line":
+                return false;
+                break;
+        }
+    }
+
+    float euclidianDistance(float x1, float y1, float x2, float y2) {
+        return math.sqrt(math.pow((x1-x2), 2) + math.pow((y1-y2), 2));
+    }
+
+
 }

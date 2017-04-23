@@ -47,14 +47,14 @@ module.exports = function(app, config) {
     var shape = req.body.shape;
 
     var filename = __dirname + '/../data/' + shape + '/' + (new Date).getTime() + '.txt';
-    var aStream = fs.createWriteStream(filename);
+    var aStream = fs.createWriteStream(filename, {flags: 'w', defaultEncoding: 'utf8'})
 
-    aStream.write(xValues.length)
+    aStream.write(xValues.length.toString() + '\n')
     for (var i = 0; i < xValues.length; ++i) {
-      aStream.write(xValues[i])
+      aStream.write(xValues[i].toString() + '\n')
     }
     for (var i = 0; i < yValues.length; ++i) {
-      aStream.write(yValues[i])
+      aStream.write(yValues[i].toString() + '\n')
     }
     aStream.end();
 

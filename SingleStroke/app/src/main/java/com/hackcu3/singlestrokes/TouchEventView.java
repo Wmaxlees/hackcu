@@ -35,9 +35,27 @@ import static android.graphics.Path.Direction.CW;
  * Created by nivinantonalexislawrence on 4/22/17.
  */
 
+/**
+ * Holds data needed to re-draw objects during transformations
+ * objectShape  data index 0,1,2,3,..
+ * "circle"     centerX, centerY, radius
+ * "square"     left, top, right, bottom
+ * "line"       startX, startY, endX, endY
+ */
+private class ObjectData {
+    String objectShape;
+    List<float> data;
+    ObjectData(String s, List<float> d) {
+        this.objectShape = s;
+        this.data = d;
+    }
+}
+
 public class TouchEventView extends View {
     private Paint paint = new Paint();
     private List<Path> pathList = new ArrayList<>();
+    private List<ObjectData> objectDataList = new ArrayList<>();
+    private Integer selectedIndex = -1; // -1 signifies that no objects are selected
     private Path path;
     private Path path_add = new Path();
     public List<Float> listOfPointX = new ArrayList<>();
@@ -290,13 +308,30 @@ public class TouchEventView extends View {
             switch (result) {
                 case "circle":
                     float radius = (p.getMaxX() - p.getMinX()) / 2.0f;
+                    List<ObjectData> data = new ArrayList<>();
+                    data.add(centerX)
+                    data.add(centerY)
+                    data.add(radius)
+                    objectDataList.add(data)
                     path.addCircle(centerX, centerY, radius, CW);
                     break;
                 case "square":
                     //path.addRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), CW);
+                    List<ObjectData> data = new ArrayList<>();
+                    data.add(p.getMinX())
+                    data.add(p.getMaxY())
+                    data.add(p.getMaxX())
+                    data.add(p.getMinY())
+                    objectDataList.add(data)
                     path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(),6,6, CW);
                     break;
                 case "line":
+                    List<ObjectData> data = new ArrayList<>();
+                    data.add(p.getStartX())
+                    data.add(p.getStartY())
+                    data.add(p.getEndX())
+                    data.add(p.getEndY())
+                    objectDataList.add(data)
                     path.moveTo(p.getStartX(), p.getStartY());
                     path.lineTo(p.getEndX(), p.getEndY());
                     break;

@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.graphics.Path.Direction.CW;
+
 /**
  * Created by nivinantonalexislawrence on 4/22/17.
  */
@@ -83,6 +85,7 @@ public class TouchEventView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(path, paint);
+
     }
 
     @Override
@@ -206,7 +209,7 @@ public class TouchEventView extends View {
     }
 
 
-    public class CallAPI extends AsyncTask<PointsDraw, PointsDraw, PointsDraw> {
+    public class CallAPI extends AsyncTask<PointsDraw, PointsDraw, String> {
         PointsDraw p;
 
         public CallAPI() {
@@ -223,6 +226,7 @@ public class TouchEventView extends View {
         @Override
         protected String doInBackground(PointsDraw... params) {
 
+            String responseString = null;
             InputStream in = null;
             try {
 
@@ -250,7 +254,7 @@ public class TouchEventView extends View {
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                     // Execute HTTP Post Request
                     HttpResponse response = httpclient.execute(httppost);
-                    String responseString = new BasicResponseHandler().handleResponse(response);
+                    responseString = new BasicResponseHandler().handleResponse(response);
                     Log.e(TouchEventView.class.getName(), response.toString());
 
 
@@ -264,7 +268,6 @@ public class TouchEventView extends View {
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 return null;
-                //return e.getMessage();
 
             }
             return responseString;
@@ -273,17 +276,19 @@ public class TouchEventView extends View {
 
         @Override
         protected void onPostExecute(String result) {
-            float centerX = (p.getMaxX() + p.getMinX) / 2.0;
-            float centerY = (p.getMaxY() + p.getMinY) / 2.0;
+            float centerX = (p.getMaxX() + p.getMinX()) / 2.0f;
+            float centerY = (p.getMaxY() + p.getMinY()) / 2.0f;
 
             //Update the UI
+//            result = "square";
             switch (result) {
                 case "circle":
-                    float radius = (p.getMaxX() - p.getMinX) / 2.0;
+                    float radius = (p.getMaxX() - p.getMinX()) / 2.0f;
                     path.addCircle(centerX, centerY, radius, CW);
                     break;
                 case "square":
-                    path.addRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), CW);
+                    //path.addRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), CW);
+                    path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(),6,6, CW);
                     break;
                 case "line":
                     path.moveTo(p.getStartX(), p.getStartY());
@@ -291,6 +296,8 @@ public class TouchEventView extends View {
                     break;
                 default:
             }
+            postInvalidate();
+
         }
     }
 }

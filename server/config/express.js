@@ -34,13 +34,30 @@ module.exports = function(app, config) {
     require(controller)(app);
   });
 
+  app.post('/classify', (req, res) => {
+    var xValues = new Buffer(req.body.x);
+    var yValues = new Buffer(req.body.y);
+
+
+  });
+
   app.post('/upload', (req, res) => {
-    var bmp = new Buffer(req.body.data);
+    var xValues = new Buffer(req.body.x);
+    var yValues = new Buffer(req.body.y);
     var shape = req.body.shape;
-    var milliseconds = (new Date).getTime();
-    var wstream = fs.createWriteStream(__dirname + '/../data/' + shape + '/' + milliseconds + '.bmp');
-    wstream.write(bmp);
-    wstream.end();
+
+    var filename = __dirname + '/../data/' + shape + '/' + (new Date).getTime() + '.txt';
+    var aStream = fs.createWriteStream(filename);
+
+    aStream.write(xValues.length)
+    for (var i = 0; i < xValues.length; ++i) {
+      aStream.write(xValues[i])
+    }
+    for (var i = 0; i < yValues.length; ++i) {
+      aStream.write(yValues[i])
+    }
+    aStream.end();
+
     res.status(200).send('Success');
   });
 

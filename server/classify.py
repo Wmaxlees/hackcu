@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+from sklearn.externals import joblib
 
 def load_xy_values (filename):
     file = open(filename, 'r')
@@ -35,7 +36,7 @@ def generate_matrix_values (x_values, y_values):
             values[x][y] = 255
             error = error + delta_err
             if error >= 0.5:
-                y = y + 1
+                y = y - 1
                 error = error - 1.0
 
     return values.flatten()
@@ -44,16 +45,16 @@ def generate_matrix_values (x_values, y_values):
 def get_class_name (index):
     if index == 0:
         return 'circle'
-    else if index == 1:
+    elif index == 1:
         return 'line'
-    else if index == 2:
+    elif index == 2:
         return 'square'
 
 
 def main (argv):
     filename = argv[1]
     x_values, y_values = load_xy_values(filename)
-    final = generate_matrix_values(x_values, y_values)
+    final = np.array([generate_matrix_values(x_values, y_values)])
 
     clf = joblib.load('hmm.pkl')
 

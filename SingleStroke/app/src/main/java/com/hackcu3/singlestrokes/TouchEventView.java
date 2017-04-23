@@ -323,7 +323,9 @@ public class TouchEventView extends View {
                     data.add(centerX);
                     data.add(centerY);
                     data.add(radius);
-                    objectDataList.add(new ObjectData("circle", data));
+                    synchronized (objectDataList) {
+                        objectDataList.add(new ObjectData("circle", data));
+                    }
                     path.addCircle(centerX, centerY, radius, CW);
                     break;
                 case "square":
@@ -333,7 +335,9 @@ public class TouchEventView extends View {
                     data.add(p.getMaxY());
                     data.add(p.getMaxX());
                     data.add(p.getMinY());
-                    objectDataList.add(new ObjectData("square", data));
+                    synchronized (objectDataList) {
+                        objectDataList.add(new ObjectData("square", data));
+                    }
                     path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), 6, 6, CW);
                     break;
                 case "line":
@@ -342,7 +346,9 @@ public class TouchEventView extends View {
                     data.add(p.getStartY());
                     data.add(p.getEndX());
                     data.add(p.getEndY());
-                    objectDataList.add(new ObjectData("line", data));
+                    synchronized (objectDataList) {
+                        objectDataList.add(new ObjectData("line", data));
+                    }
                     path.moveTo(p.getStartX(), p.getStartY());
                     path.lineTo(p.getEndX(), p.getEndY());
                     break;

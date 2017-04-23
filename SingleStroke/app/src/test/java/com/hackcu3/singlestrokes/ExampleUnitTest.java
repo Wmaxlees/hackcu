@@ -1,4 +1,4 @@
-package com.hackcu3.singlestroke;
+package com.hackcu3.singlestrokes;
 
 import org.junit.Test;
 

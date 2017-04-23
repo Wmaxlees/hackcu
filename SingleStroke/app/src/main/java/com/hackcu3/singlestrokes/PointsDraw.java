@@ -1,4 +1,4 @@
-package com.hackcu3.singlestroke;
+package com.hackcu3.singlestrokes;
 
 import java.util.List;
 
@@ -8,29 +8,29 @@ import java.util.List;
 
 public class PointsDraw {
 
-    List<Float> x;
-    List<Float> y;
+    List<Byte> x;
+    List<Byte> y;
     String shape;
 
-    public PointsDraw(List<Float> pointsX, List<Float> pointsY, String shape) {
+    public PointsDraw(List<Byte> pointsX, List<Byte> pointsY, String shape) {
         this.x = pointsX;
         this.y = pointsY;
         this.shape = shape;
     }
 
-    public List<Float> getPointsX() {
+    public List<Byte> getPointsX() {
         return x;
     }
 
-    public void setPointsX(List<Float> pointsX) {
+    public void setPointsX(List<Byte> pointsX) {
         this.x = pointsX;
     }
 
-    public List<Float> getPointsY() {
+    public List<Byte> getPointsY() {
         return y;
     }
 
-    public void setPointsY(List<Float> pointsY) {
+    public void setPointsY(List<Byte> pointsY) {
         this.x = pointsY;
     }
 

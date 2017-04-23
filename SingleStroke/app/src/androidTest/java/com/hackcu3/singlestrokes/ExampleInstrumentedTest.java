@@ -1,4 +1,4 @@
-package com.hackcu3.singlestroke;
+package com.hackcu3.singlestrokes;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

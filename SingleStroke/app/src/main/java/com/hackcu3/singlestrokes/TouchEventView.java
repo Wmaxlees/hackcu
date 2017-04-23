@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 
 import static android.graphics.Path.Direction.CW;
 
@@ -35,21 +36,7 @@ import static android.graphics.Path.Direction.CW;
  * Created by nivinantonalexislawrence on 4/22/17.
  */
 
-/**
- * Holds data needed to re-draw objects during transformations
- * objectShape  data index 0,1,2,3,..
- * "circle"     centerX, centerY, radius
- * "square"     left, top, right, bottom
- * "line"       startX, startY, endX, endY
- */
-private class ObjectData {
-    String objectShape;
-    List<float> data;
-    ObjectData(String s, List<float> d) {
-        this.objectShape = s;
-        this.data = d;
-    }
-}
+
 
 public class TouchEventView extends View {
     private Paint paint = new Paint();
@@ -65,6 +52,23 @@ public class TouchEventView extends View {
     Context context;
 
     GestureDetector gestureDetector;
+
+    /**
+     * Holds data needed to re-draw objects during transformations
+     * objectShape  data index 0,1,2,3,..
+     * "circle"     centerX, centerY, radius
+     * "square"     left, top, right, bottom
+     * "line"       startX, startY, endX, endY
+     */
+    private class ObjectData {
+        String objectShape;
+        List<Float> data;
+
+        ObjectData(String s, List<Float> d) {
+            this.objectShape = s;
+            this.data = d;
+        }
+    }
 
     public TouchEventView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -115,10 +119,17 @@ public class TouchEventView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: // start position
-                // add new path to our path list
+                selectedIndex = -1;
+                for (Integer i = 0; i < pathList.size(); ++i) {
+                    if (shapeContainsPoint(pathList.get(i), objectDataList.get(i), eventX, eventY)) {
+                        // @TODO: double-click would check here if i was already selected
+                        selectedIndex = i;
+                        // @TODO: change color of selected object
+                        System.out.println("selected object " + i);
+                    }
+                }
                 pathList.add(new Path());
                 path = pathList.get(pathList.size() - 1);
-
                 path.moveTo(eventX, eventY);
                 listOfPointX.add(eventX);
                 listOfPointY.add(eventY);
@@ -204,7 +215,7 @@ public class TouchEventView extends View {
 
         List<Byte> bytesX = new ArrayList<>();
         List<Byte> bytesY = new ArrayList<>();
-        int prevx=0, prevy=0;
+        int prevx = 0, prevy = 0;
         for (int i = 0; i < listOfPointX.size(); ++i) {
 
             int currX, currY;
@@ -255,7 +266,7 @@ public class TouchEventView extends View {
             try {
 
                 HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost("http://ec2-52-43-9-170.us-west-2.compute.amazonaws.com/upload");
+                HttpPost httppost = new HttpPost("http://ec2-52-43-9-170.us-west-2.compute.amazonaws.com/classify");
 
                 try {
                     p = params[0];   // used in onPostExecute
@@ -305,40 +316,63 @@ public class TouchEventView extends View {
 
             //Update the UI
             //result = "square";
+            List<Float> data = new ArrayList<>();
             switch (result) {
                 case "circle":
                     float radius = (p.getMaxX() - p.getMinX()) / 2.0f;
-                    List<ObjectData> data = new ArrayList<>();
-                    data.add(centerX)
-                    data.add(centerY)
-                    data.add(radius)
-                    objectDataList.add(data)
+                    data.add(centerX);
+                    data.add(centerY);
+                    data.add(radius);
+                    objectDataList.add(new ObjectData("circle", data));
                     path.addCircle(centerX, centerY, radius, CW);
                     break;
                 case "square":
                     //path.addRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), CW);
-                    List<ObjectData> data = new ArrayList<>();
-                    data.add(p.getMinX())
-                    data.add(p.getMaxY())
-                    data.add(p.getMaxX())
-                    data.add(p.getMinY())
-                    objectDataList.add(data)
-                    path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(),6,6, CW);
+                    //data = new ArrayList<>();
+                    data.add(p.getMinX());
+                    data.add(p.getMaxY());
+                    data.add(p.getMaxX());
+                    data.add(p.getMinY());
+                    objectDataList.add(new ObjectData("square", data));
+                    path.addRoundRect(p.getMinX(), p.getMaxY(), p.getMaxX(), p.getMinY(), 6, 6, CW);
                     break;
                 case "line":
-                    List<ObjectData> data = new ArrayList<>();
-                    data.add(p.getStartX())
-                    data.add(p.getStartY())
-                    data.add(p.getEndX())
-                    data.add(p.getEndY())
-                    objectDataList.add(data)
+                    //data = new ArrayList<>();
+                    data.add(p.getStartX());
+                    data.add(p.getStartY());
+                    data.add(p.getEndX());
+                    data.add(p.getEndY());
+                    objectDataList.add(new ObjectData("line", data));
                     path.moveTo(p.getStartX(), p.getStartY());
                     path.lineTo(p.getEndX(), p.getEndY());
                     break;
                 default:
             }
             postInvalidate();
-
         }
     }
+
+    boolean shapeContainsPoint(Path p, ObjectData o, float x, float y) {
+        switch (o.objectShape) {
+            case "circle":
+
+                return euclidianDistance(o.data.get(0), x, o.data.get(1), y) <= o.data.get(2);
+            //break;
+            case "square":
+                return o.data.get(0) <= x && o.data.get(1) >= y && o.data.get(2) >= x && o.data.get(3) <= y;
+            //break;
+            case "line":
+                return false;
+            //break;
+            default:
+                return false;
+        }
+        //return false;
+    }
+
+    float euclidianDistance(Float x1, Float y1, float x2, float y2) {
+        return (float) Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+    }
+
+
 }

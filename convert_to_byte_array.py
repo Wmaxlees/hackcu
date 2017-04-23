@@ -41,12 +41,15 @@ def generate_matrix_values (x_values, y_values):
 
 
 def main (argv):
-    filename = 'test.txt'
-    x_values, y_values = load_xy_values(filename)
+    for shape in os.listdir(argv[1]):
+        for file in os.listdir(argv[1] + '/' + shape):
+            filename = argv[1] + '/' + shape + '/' + file;
+            x_values, y_values = load_xy_values(filename)
 
-    final = generate_matrix_values(x_values, y_values)
+            final = generate_matrix_values(x_values, y_values)
 
-    print(final)
+            target = argv[2] + '/' + shape + '/' + file;
+            np.save(target, final)
 
 
 if __name__ == '__main__':

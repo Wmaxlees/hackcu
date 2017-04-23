@@ -41,6 +41,15 @@ def generate_matrix_values (x_values, y_values):
     return values.flatten()
 
 
+def get_class_name (index):
+    if index == 0:
+        return 'circle'
+    else if index == 1:
+        return 'line'
+    else if index == 2:
+        return 'square'
+
+
 def main (argv):
     filename = argv[1]
     x_values, y_values = load_xy_values(filename)
@@ -52,7 +61,7 @@ def main (argv):
 
     os.remove(filename)
 
-    print(result)
+    print(get_class_name(result))
 
 
 if __name__ == '__main__':

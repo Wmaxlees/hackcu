@@ -9,6 +9,7 @@ var compress = require('compression');
 var methodOverride = require('method-override');
 
 var fs = require('fs');
+var spawn = require("child_process").spawn;
 
 module.exports = function(app, config) {
   var env = process.env.NODE_ENV || 'development';
@@ -35,15 +36,30 @@ module.exports = function(app, config) {
   });
 
   app.post('/classify', (req, res) => {
-    var xValues = new Buffer(req.body.x);
-    var yValues = new Buffer(req.body.y);
+    var xValues = JSON.parse(req.body.x);
+    var yValues = JSON.parse(req.body.y);
 
+    var filename = __dirname + '/../tmp/' + (new Date).getTime() + '.txt';
+    var aStream = fs.createWriteStream(filename, {flags: 'w', defaultEncoding: 'utf8'})
 
+    aStream.write(xValues.length.toString() + '\n')
+    for (var i = 0; i < xValues.length; ++i) {
+      aStream.write(xValues[i].toString() + '\n')
+    }
+    for (var i = 0; i < yValues.length; ++i) {
+      aStream.write(yValues[i].toString() + '\n')
+    }
+    aStream.end();
+
+    var process = spawn('python3', [__dirname + '/../classify.py', filename]);
+    process.stdout.on('data', (data) => {
+      res.status(200).send(data);
+    });
   });
-
+  
   app.post('/upload', (req, res) => {
-    var xValues = new Buffer(req.body.x);
-    var yValues = new Buffer(req.body.y);
+    var xValues = JSON.parse(req.body.x);
+    var yValues = JSON.parse(req.body.y);
     var shape = req.body.shape;
 
     var filename = __dirname + '/../data/' + shape + '/' + (new Date).getTime() + '.txt';

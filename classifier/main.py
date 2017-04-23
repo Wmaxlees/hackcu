@@ -1,6 +1,7 @@
 import math
 import sys
 from sklearn.neural_network import MLPClassifier
+from sklearn.externals import joblib
 
 def load_mnist_training_data (filename):
     label_file = open(filename, 'rb')
@@ -65,6 +66,9 @@ def main (argv):
 
     accuracy = clf.score(testing_data, testing_labels)
     print(accuracy*100)
+
+    joblib.dump(clf, 'hmm.pkl')
+
 
 if __name__ == '__main__':
     main(sys.argv)

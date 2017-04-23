@@ -258,8 +258,11 @@ public class TouchEventView extends View {
                     //nameValuePairs.add(new BasicNameValuePair("data", params[0]));
                     nameValuePairs.add(new BasicNameValuePair("x", params[0].getPointsX().toString()));
                     nameValuePairs.add(new BasicNameValuePair("y", params[0].getPointsY().toString()));
+
                     nameValuePairs.add(new BasicNameValuePair("shape", "line"));
                     //new ArrayList<>().add()
+
+                    //nameValuePairs.add(new BasicNameValuePair("shape", "square"));
 
                     Log.e(TouchEventView.class.getName(), params[0].getPointsX().toString());
                     Log.e(TouchEventView.class.getName(), params[0].getPointsY().toString());
